@@ -8,35 +8,62 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  orders    Order[]
+    id                Int            @id @default(autoincrement())
+    name              String
+    email             String         @unique
+    password          String
+    emailVerified     Boolean        @default(false)
+    verificationToken String?
+    resetToken        String?
+    tokenExpiry       DateTime?
+    profilePicture    String?
+    orders            Order[]
+    likedProducts     Product[]      @relation("LikedProducts")
 }
 
 model Product {
-  id          Int     @id @default(autoincrement())
-  name        String
-  description String?
-  price       Float
-  quantity    Int
-  orderItems  OrderProduct[] // Adicionado para referenciar os itens da ordem
+  id            Int          @id @default(autoincrement())
+  name          String
+  description   String?
+  price         Float
+  quantity      Int
+  photoPath     String?
+  brand         String
+  type          String
+  flavors       Flavor[]
+  sizes         Size[]
+  orderItems    OrderProduct[]
+  likedBy       User[]       @relation("LikedProducts")
+}
+
+model Flavor {
+  id        Int      @id @default(autoincrement())
+  name      String
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+}
+
+model Size {
+  id        Int      @id @default(autoincrement())
+  name      String
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
 }
 
 model Order {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  orderItems OrderProduct[] // Adicionado para referenciar os itens da ordem
-  total     Float
+  id           Int            @id @default(autoincrement())
+  createdAt    DateTime       @default(now())
+  userId       Int
+  user         User           @relation(fields: [userId], references: [id])
+  orderItems   OrderProduct[]
+  total        Float
 }
 
 model OrderProduct {
-  order     Order   @relation(fields: [orderId], references: [id])
-  orderId   Int
-  product   Product @relation(fields: [productId], references: [id])
-  productId Int
-  quantity  Int
+  order        Order          @relation(fields: [orderId], references: [id])
+  orderId      Int
+  product      Product        @relation(fields: [productId], references: [id])
+  productId    Int
+  quantity     Int
   @@id([orderId, productId])
 }

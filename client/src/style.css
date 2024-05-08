@@ -5,3 +5,24 @@
 .main-content {
     min-height: calc(100vh - 112px);
   }
+
+::-webkit-scrollbar {
+    width: 8px; /* Largura da barra */
+    height: 8px; /* Altura da barra */
+}
+
+/* Trilho da barra */
+::-webkit-scrollbar-track {
+    background: #111111; /* Cor de fundo da trilha */
+}
+
+/* Barra de rolagem */
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #301414, #552424);
+    border-radius: 4px;
+}
+
+/* Estado hover do manipulador da barra de rolagem */
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #552424, #301414); /* Inverte o gradiente ao passar o mouse */
+}

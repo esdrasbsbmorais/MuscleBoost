@@ -1,16 +1,59 @@
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import LogoMuscleVM from "../assets/logos/LogoMuscleVM.svg";
 import NavBar from "../components/app/NavBar";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Register with:", name, email, password, confirmPassword);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    if (password !== confirmPassword) {
+        setErrorMessage("As senhas não coincidem!");
+        return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3001/register", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+              name,
+              email,
+              password,
+          }),
+      });
+  
+      const data = await response.json();
+      if (response.status === 201) {
+          setSuccessMessage("Registro realizado com sucesso! Por favor, verifique seu e-mail para confirmar sua conta.");
+          setName("");
+          setEmail("");
+          setPassword("");
+          setConfirmPassword("");
+          setTimeout(() => {
+            navigate("/Conectar");
+          }, 5000);
+      } else {
+          throw new Error(data.message || "Erro ao registrar o usuário");
+      }
+    } catch (error) {
+        setErrorMessage("Erro ao registrar: " + error.message);
+    }
   };
 
   return (
@@ -27,6 +70,10 @@ export default function Register() {
             <h2 className="text-2xl font-bold text-center text-white mt-4 mb-4">
               Registre-se
             </h2>
+
+            {errorMessage && <p className="text-center text-red-500 mb-4">{errorMessage}</p>}
+            {successMessage && <p className="text-center text-green-500 mb-4">{successMessage}</p>}
+
             <div className="mb-4">
               <label htmlFor="name" className="block text-lg text-white">
                 Nome Completo
@@ -42,7 +89,7 @@ export default function Register() {
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="email" className="block text-lg text-white">
+              <label htmlFor="email" class="block text-lg text-white">
                 Email
               </label>
               <input
@@ -59,36 +106,60 @@ export default function Register() {
               <label htmlFor="password" className="block text-lg text-white">
                 Senha
               </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 mt-2 text-white bg-[#121212] rounded-md focus:bg-[#121212] focus:border-red-800 focus:outline-none focus:ring-4 focus:ring-red-800 cursor-text"
-                placeholder="Digite sua senha"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 mt-2 text-white bg-[#121212] rounded-md focus:bg-[#121212] focus:border-red-800 focus:outline-none focus:ring-4 focus:ring-red-800 cursor-text"
+                  placeholder="Digite sua senha"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-6 text-white hover:text-slate-200"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
             </div>
             <div className="mb-6">
               <label htmlFor="confirmPassword" className="block text-lg text-white">
-                Confirme Sua Senha
+                Confirme a Senha
               </label>
-              <input
-                type="password"
-                id="confirmPassword"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 mt-2 text-white bg-[#121212] rounded-md focus:bg-[#121212] focus:border-red-800 focus:outline-none focus:ring-4 focus:ring-red-800 cursor-text"
-                placeholder="Confirme sua senha"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  id="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-3 mt-2 text-white bg-[#121212] rounded-md focus:bg-[#121212] focus:border-red-800 focus:outline-none focus:ring-4 focus:ring-red-800 cursor-text"
+                  placeholder="Confirme sua senha"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-6 text-white hover:text-slate-200"
+                >
+                  {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
             </div>
             <button
               type="submit"
-              className="w-full py-3 text-lg font-semibold bg-[#830000] hover:bg-[#730000] text-white rounded-md"
+              className="w-full px-4 py-3 font-bold text-white bg-red-800 rounded-md hover:bg-red-900 focus:outline-none focus:ring-4 focus:ring-red-800"
             >
-              Registre-se
+              Registrar
             </button>
+            <div className="flex justify-center mt-4">
+              <p className="text-white">Já tem uma conta? </p>
+              <Link to="/Conectar" className="text-red-800 hover:underline ml-2">
+                Conectar
+              </Link>
+            </div>
           </form>
         </div>
     </div>
